@@ -65,3 +65,5 @@
 .celebration .playercard .pname{font-size:22px}
 .celebration .playercard .sig{font-size:25px}
 @media(max-width:550px){.playercard .jersey{font-size:clamp(80px,20vw,120px)}.pickcard .playercard .jersey{font-size:clamp(39px,11vw,56px)}.pickcard .playercard .pname{font-size:clamp(12px,3.3vw,16px)}.pickcard .playercard .sig{font-size:clamp(15px,4vw,20px)}.modal{padding:15px}.pickgrid{gap:5px}}
+
+.auth-box{width:min(520px,95vw);margin:auto}.auth-box .panel{text-align:left}.cloud-status{font-size:11px;color:#b8ff3b;font-weight:700;max-width:130px}.topbar .row{align-items:center;gap:8px}@media(max-width:440px){.cloud-status{font-size:9px;max-width:82px}}
