@@ -40,3 +40,7 @@ The app caches its core files for offline use after a successful first load. Bro
 - `sw.js` — offline cache
 - `manifest.webmanifest` — installable app configuration
 - `icon.svg` — app icon
+
+
+## Version 1.2.0
+A persistent **V1.2.0** badge appears in the top-right corner of every page, including first-time setup and the live match. The service-worker cache has been versioned and the HTML references versioned CSS/JS files. Upload the *contents* of this ZIP to the root of your GitHub Pages repository. Wait for Pages deployment and open the site in a fresh browser tab. If the badge still says V1.1 or is absent, your browser is serving an old deployment/cache.
