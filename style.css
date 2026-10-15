@@ -34,3 +34,34 @@
 .celebration{display:grid;justify-items:center;gap:8px;padding:20px}.celebration h1{font-size:clamp(40px,10vw,85px)}.celebration .playercard{width:145px;height:210px}.celebration h2{font-size:clamp(24px,6vw,44px)}
 @media(max-width:550px){.broadcast-board{padding:18px 8px}.broadcast-row,.broadcast-goals{grid-template-columns:minmax(0,1fr) 95px minmax(0,1fr);gap:4px}.broadcast-team{font-size:clamp(15px,5vw,24px)}.broadcast-score{font-size:49px}.broadcast-goals>div{font-size:11px}.pickgrid{gap:5px}.pickcard .playercard .jersey{font-size:37px}.pickcard .playercard .pname{font-size:13px}.pickcard .playercard .sig{font-size:15px}.pickcard .playercard .crest{font-size:7px}}
 @media(prefers-reduced-motion:reduce){.event-flash{animation:none;opacity:1}}
+
+/* V1.4 player-card redesign: compact hierarchy, large number, no wasted vertical space */
+.playercard{padding:10px 9px 8px;gap:0;justify-content:initial;background:radial-gradient(ellipse at 55% 34%,#426e4755,transparent 55%),linear-gradient(150deg,#1c3e39 0%,#0c1a29 78%)}
+.playercard .crest{flex:0 0 auto;width:100%;font-size:11px;line-height:1.25;letter-spacing:.055em;padding:5px 3px;white-space:normal;overflow-wrap:anywhere}
+.playercard .card-art{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;align-items:center;width:100%;overflow:hidden}
+.playercard .card-rays{position:absolute;inset:5%;background:linear-gradient(125deg,transparent 22%,#b8ff3b17 23%,transparent 43%),linear-gradient(45deg,transparent 35%,#b8ff3b13 36%,transparent 53%);pointer-events:none}
+.playercard .jersey{position:relative;font-size:clamp(86px,13vw,155px);line-height:.85;letter-spacing:-.045em;text-shadow:0 0 32px #a8ff4370}
+.playercard .card-position{position:relative;font-size:10px;letter-spacing:.22em;color:#c7e1d4;margin-top:10px;text-transform:uppercase}
+.playercard .card-identity{flex:0 0 auto;width:100%;padding:8px 4px 5px;border-top:1px solid #b8ff3b55}
+.playercard .pname{font-size:clamp(24px,3vw,36px);line-height:1.05}
+.playercard .sig{font-size:clamp(29px,4vw,42px);line-height:1.15;min-height:0;margin:0 auto;transform:rotate(-5deg)}
+.playercard .card-foot{flex:0 0 auto;font-size:9px;letter-spacing:.16em;color:#b9d5d0;padding:5px 0 2px}
+.pickgrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pickcard{border-radius:12px;padding:1px;touch-action:manipulation}
+.pickcard .playercard{aspect-ratio:4/5;border-radius:11px;padding:5px 4px 4px}
+.pickcard .playercard:before{inset:4px;border-radius:8px}
+.pickcard .playercard .crest{font-size:7px;letter-spacing:0;padding:2px}
+.pickcard .playercard .jersey{font-size:clamp(42px,10vw,72px)}
+.pickcard .playercard .card-position{font-size:7px;margin-top:3px}
+.pickcard .playercard .card-identity{padding:4px 2px 2px}
+.pickcard .playercard .pname{font-size:clamp(13px,3.5vw,20px)}
+.pickcard .playercard .sig{font-size:clamp(16px,4vw,23px)}
+.pickcard .playercard .card-foot{font-size:6px;letter-spacing:.03em;padding:2px}
+.no-assist{width:100%;min-height:54px;margin:10px 0}
+.undo-goal{background:#07111f;color:#b8ff3b;border:2px solid #07111f;border-radius:12px;padding:12px 25px;font-weight:900;font-size:18px;min-height:48px}
+.event-flash:has(.undo-goal){animation:none;background:rgba(184,255,59,.96)}
+.celebration .playercard{width:160px;height:215px;aspect-ratio:auto}
+.celebration .playercard .jersey{font-size:75px}
+.celebration .playercard .pname{font-size:22px}
+.celebration .playercard .sig{font-size:25px}
+@media(max-width:550px){.playercard .jersey{font-size:clamp(80px,20vw,120px)}.pickcard .playercard .jersey{font-size:clamp(39px,11vw,56px)}.pickcard .playercard .pname{font-size:clamp(12px,3.3vw,16px)}.pickcard .playercard .sig{font-size:clamp(15px,4vw,20px)}.modal{padding:15px}.pickgrid{gap:5px}}

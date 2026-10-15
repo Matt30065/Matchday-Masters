@@ -45,7 +45,7 @@ The app caches its core files for offline use after a successful first load. Bro
 ## Version 1.2.0
 A persistent **V1.2.0** badge appears in the top-right corner of every page, including first-time setup and the live match. The service-worker cache has been versioned and the HTML references versioned CSS/JS files. Upload the *contents* of this ZIP to the root of your GitHub Pages repository. Wait for Pages deployment and open the site in a fresh browser tab. If the badge still says V1.1 or is absent, your browser is serving an old deployment/cache.
 
-## Version 1.3.0
+## Version 1.4.0
 - Shared broadcast scoreboard for live matches and reports, with goal minutes beneath team names.
 - Goal and assist selection limited to players currently on the pitch, using miniature player cards.
 - Batch substitutions with OFF/ON pairing review.
