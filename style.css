@@ -14,3 +14,23 @@
 /* Persistent build identifier: visible on every screen including onboarding and live matches. */
 #version-badge{position:fixed;top:calc(env(safe-area-inset-top, 0px) + 7px);right:8px;z-index:1005;background:#b8ff3b;color:#07111f;font:800 11px/1.2 system-ui,sans-serif;letter-spacing:.04em;border:1px solid #07111f;border-radius:7px;padding:5px 7px;box-shadow:0 2px 12px #0008;pointer-events:none}
 .topbar{padding-right:78px}
+/* V1.3 broadcast scoreboard and card-based match controls */
+.broadcast-board{padding:24px 20px;text-align:center;background:radial-gradient(ellipse at 50% -50%,#47715b44,transparent 70%),linear-gradient(155deg,#16283a,#0b1726)}
+.broadcast-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(110px,190px) minmax(0,1fr);gap:10px;align-items:center}
+.broadcast-team{font:900 clamp(18px,3.3vw,38px)/1.1 'Barlow Condensed',sans-serif;text-transform:uppercase;overflow-wrap:anywhere}
+.broadcast-score{font:900 clamp(48px,8vw,100px)/1 'Barlow Condensed',sans-serif;white-space:nowrap;letter-spacing:-.025em}
+.broadcast-score span{color:var(--lime);margin:0 4px}
+.broadcast-goals{display:grid;grid-template-columns:minmax(0,1fr) minmax(110px,190px) minmax(0,1fr);gap:10px;align-items:start;margin:8px 0 18px;min-height:52px}
+.broadcast-goals>div:first-child{text-align:center}.broadcast-goals>div:last-child{text-align:center}.broadcast-goals>div{font-size:13px;line-height:1.8;color:#dce9f4;overflow-wrap:anywhere}
+.broadcast-goals .clock{font-size:clamp(29px,5vw,52px);line-height:1.1}
+.broadcast-bottom{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:15px}
+.pickgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+.pickcard{background:none;border:3px solid transparent;border-radius:14px;padding:2px;min-width:0;color:white}
+.pickcard .playercard{width:100%;border-radius:10px;padding:8px 4px;box-shadow:none}
+.pickcard .playercard .crest{font-size:8px}.pickcard .playercard .position{font-size:8px}.pickcard .playercard .jersey{font-size:46px}.pickcard .playercard .pname{font-size:16px}.pickcard .playercard .sig{font-size:19px;min-height:20px}
+.pickcard.selected{border-color:var(--lime);background:#b8ff3b44}
+.subpair{padding:8px;border-bottom:1px solid var(--line)}
+.modal{width:min(680px,100%)}.goal-flash{background:#b8ff3bed;animation:event-confirm 1.6s ease-out forwards}.opponent-flash{background:#9b2433e8;color:#fff}
+.celebration{display:grid;justify-items:center;gap:8px;padding:20px}.celebration h1{font-size:clamp(40px,10vw,85px)}.celebration .playercard{width:145px;height:210px}.celebration h2{font-size:clamp(24px,6vw,44px)}
+@media(max-width:550px){.broadcast-board{padding:18px 8px}.broadcast-row,.broadcast-goals{grid-template-columns:minmax(0,1fr) 95px minmax(0,1fr);gap:4px}.broadcast-team{font-size:clamp(15px,5vw,24px)}.broadcast-score{font-size:49px}.broadcast-goals>div{font-size:11px}.pickgrid{gap:5px}.pickcard .playercard .jersey{font-size:37px}.pickcard .playercard .pname{font-size:13px}.pickcard .playercard .sig{font-size:15px}.pickcard .playercard .crest{font-size:7px}}
+@media(prefers-reduced-motion:reduce){.event-flash{animation:none;opacity:1}}
