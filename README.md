@@ -1,23 +1,23 @@
-# Matchday Masters V1.8.2.1 — Moments Engine
+# Matchday Masters V1.9.0 — Cloud safety checks
 
-This version builds on the working V1.7.1 cloud-connected application.
+This is a **conservative security and reliability checkpoint** built from V1.8.2.1. The approved matchday UI, Moments, and cloud snapshot storage are unchanged.
 
-## What's new
-- Premium collectible moment tiles with player name, shirt number and decorative script signature.
-- Achievements derived from completed match records: first goal, career/season goal totals, assists, hat-tricks, appearances, starting streaks and scoring streaks.
-- Upcoming milestones for goals, assists, appearances and consecutive starts.
-- Club records for top scorer, most appearances, most assists and biggest victory.
-- Tapping an achieved moment opens the original match report.
-- Achieved moments are recalculated from match history after a match is deleted, rather than stored as permanent stale entries.
+## What's included
+- A **Cloud Health** panel in Settings, showing last confirmed upload, pending local changes, conflict status, and a **read-only** server revision check.
+- A **Retry Sync** button and a best-effort browser warning when closing a page with pending edits.
+- Version and cache update to V1.9.0.
+- `supabase-v1.9-security-audit.sql`: read-only SQL to inspect RLS policies, anonymous permissions, and snapshot RPC access.
 
-## Deployment
-1. Export a backup in Settings.
-2. Extract the ZIP and upload the app files to the root of the existing GitHub Pages repository, replacing existing files.
-3. Confirm the version badge shows V1.8.2.1. No new Supabase SQL is needed.
+## Installation
+1. In V1.8.2, export a backup and wait for CLOUD SYNCED.
+2. Upload the app files (index.html, app.js, cloud.js, style.css, sw.js, manifest.webmanifest, icon.svg) to the GitHub repository root. **Do not upload the SQL audit to GitHub.**
+3. Check the V1.9.0 badge. In Settings, use CHECK CLOUD to compare revisions.
+4. Run `supabase-v1.9-security-audit.sql` in Supabase SQL Editor. This only reads metadata; it does not modify tables.
+5. Check that all seven tables show `rls_enabled = true`, all `anon_* = false`, and `anon_can_save_snapshot = false`. Review policy text and run a separate two-account access test before storing children's real details.
 
-## Limitations
-- This is a development build; full browser and security testing are outstanding.
-- Moments are computed from completed matches only. If you imported aggregate player totals without match events, the engine cannot reconstruct historical achievements.
-- Matches with identical dates are ordered by ID. For accurate same-day milestone ordering, enter matches in chronological order and avoid ambiguous date-only ordering.
-- Club records are derived from current completed matches; historical edits and deletions change records automatically.
-- The cloud schema is unchanged; normalized database migration and security verification remain future work.
+## Known limits
+- This release **does not** migrate snapshot JSON into normalized tables. That migration requires a separately staged, reversible process with verification of existing data and is still outstanding.
+- A matching cloud revision does not mean another browser has refreshed its display. Do not record the same match on two devices at once.
+- Browser close warnings may be suppressed; always wait for CLOUD SYNCED and export backups.
+- Offline caching of the Supabase JavaScript CDN remains a limitation for cold-start offline use. Do not rely on this app as the sole match record yet.
+- RLS metadata inspection is **not** proof of tenant isolation. Test with two separate accounts before real child data.

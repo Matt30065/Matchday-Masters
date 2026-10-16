@@ -16,6 +16,7 @@ function refreshCloudStatus(){
     ?' · '+new Date(cloud.lastSyncedAt).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '';
   el.textContent=message+time;
   el.setAttribute('aria-label',message+time);
+  if(typeof updateCloudHealth==='function')updateCloudHealth();
   el.title=cloud.lastSyncedAt?'Last successful cloud sync: '+new Date(cloud.lastSyncedAt).toLocaleString('en-GB'):message;
 }
 function storeLocal(){if(!cloud.user)return false;try{localStorage.setItem(localKey(),JSON.stringify({clubId:cloud.clubId,revision:cloud.revision,dirty:cloud.dirty,db,at:Date.now()}));return true}catch(e){cloudStatus('⚠ DEVICE STORAGE FULL — EXPORT BACKUP');return false}}
@@ -29,3 +30,24 @@ async function cloudFlush(){if(!cloud.user||cloud.loading||!cloud.dirty||cloud.c
 function queueCloudSave(){cloud.dirty=true;if(!storeLocal())return;cloudStatus(navigator.onLine?'🟡 SAVING…':'🔴 OFFLINE — SAVED ON DEVICE');clearTimeout(cloud.timer);cloud.timer=setTimeout(cloudFlush,700)}
 async function cloudSignOut(){if(cloud.dirty){if(navigator.onLine)await cloudFlush();if(cloud.dirty){alert('Unsynced changes remain on this device. Please reconnect and wait for CLOUD SYNCED before signing out.');return}}await cloud.client.auth.signOut();cloud.user=null;cloud.clubId=null;cloud.revision=0;cloud.dirty=false;db=initial();renderAuth()}
 async function initCloud(){if(!window.supabase){showCloudError('Connection library unavailable. Connect to the internet and reload to sign in.');return}cloud.client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});cloud.client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'){cloud.user=null;cloud.clubId=null;renderAuth()}});await cloudLoad();window.addEventListener('online',()=>{if(cloud.dirty)cloudFlush();else cloudStatus(cloud.conflict?'⚠ CLOUD CONFLICT — EXPORT BACKUP':'🟡 CONNECTING…')});window.addEventListener('offline',()=>cloudStatus(cloud.dirty?'🔴 OFFLINE — SAVED ON DEVICE':'🔴 OFFLINE — LAST CLOUD SAVE RETAINED'));document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cloud.dirty)cloudFlush()})}
+
+// V1.9: read-only cloud verification. Never claim sync solely from navigator.onLine.
+function updateCloudHealth(extra=''){
+  const el=document.getElementById('cloud-health-detail');if(!el)return;
+  const when=cloud.lastSyncedAt?new Date(cloud.lastSyncedAt).toLocaleString('en-GB'):'Not confirmed this session';
+  el.textContent=`Last confirmed upload: ${when}. Local edits pending: ${cloud.dirty?'YES':'NO'}. Conflict: ${cloud.conflict?'YES':'NO'}. ${extra}`;
+}
+async function checkCloudHealth(){
+  const el=document.getElementById('cloud-health-detail');if(!el)return;
+  if(!navigator.onLine){updateCloudHealth('Offline: cloud cannot be checked.');return}
+  if(!cloud.user||!cloud.clubId){updateCloudHealth('No cloud club loaded.');return}
+  el.textContent='Checking the stored cloud revision…';
+  try{
+    const {data,error}=await cloud.client.from('clubs').select('sync_revision').eq('id',cloud.clubId).single();
+    if(error)throw error;
+    const remote=Number(data.sync_revision),local=Number(cloud.revision);
+    updateCloudHealth(remote===local?`Cloud revision ${remote} matches this device.`:`Cloud revision ${remote}, device revision ${local}. Another device may have newer changes. Do not overwrite; export a backup before reloading.`);
+  }catch(e){updateCloudHealth('Cloud check failed: '+(e.message||'Unknown error'))}
+}
+// Warn only while changes are not uploaded; browsers may suppress the message.
+window.addEventListener('beforeunload',e=>{if(cloud.user&&cloud.dirty){e.preventDefault();e.returnValue=''}});
