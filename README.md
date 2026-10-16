@@ -1,4 +1,4 @@
-# Matchday Masters V1.8.1.1 — Moments Engine
+# Matchday Masters V1.8.2.1 — Moments Engine
 
 This version builds on the working V1.7.1 cloud-connected application.
 
@@ -13,7 +13,7 @@ This version builds on the working V1.7.1 cloud-connected application.
 ## Deployment
 1. Export a backup in Settings.
 2. Extract the ZIP and upload the app files to the root of the existing GitHub Pages repository, replacing existing files.
-3. Confirm the version badge shows V1.8.1.1. No new Supabase SQL is needed.
+3. Confirm the version badge shows V1.8.2.1. No new Supabase SQL is needed.
 
 ## Limitations
 - This is a development build; full browser and security testing are outstanding.
