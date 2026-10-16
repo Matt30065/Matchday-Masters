@@ -68,21 +68,28 @@
 
 .auth-box{width:min(520px,95vw);margin:auto}.auth-box .panel{text-align:left}.cloud-status{font-size:11px;color:#b8ff3b;font-weight:700;max-width:130px}.topbar .row{align-items:center;gap:8px}@media(max-width:440px){.cloud-status{font-size:9px;max-width:82px}}
 /* V1.8 collectible memories */
-.moment-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:14px;margin:16px 0}
-.moment-tile{min-width:0;width:100%;display:flex;flex-direction:column;text-align:left;color:#f5f7fa;border:1px solid rgba(184,255,59,.3);border-radius:18px;background:linear-gradient(150deg,#203a43 0%,#0b1727 50%,#07111f 100%);padding:16px;min-height:245px;position:relative;overflow:hidden;font:inherit}
-button.moment-tile{cursor:pointer}
+/* Compact broadcast-inspired moments, distinct from full player trading cards. */
+.moment-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px;margin:16px 0}
+.moment-tile{width:100%;min-width:0;display:flex;flex-direction:column;gap:12px;text-align:left;color:#f5f7fa;border:1px solid rgba(184,255,59,.45);border-radius:18px;background:radial-gradient(circle at 85% 28%,#b8ff3b1a,transparent 44%),linear-gradient(145deg,#203a43,#091524 72%);padding:18px;position:relative;overflow:hidden;font:inherit;min-height:0}
+button.moment-tile{cursor:pointer;transition:border-color .15s,transform .15s}
+button.moment-tile:hover{border-color:#b8ff3b;transform:translateY(-2px)}
 .moment-tile:focus-visible{outline:3px solid #b8ff3b;outline-offset:3px}
-.moment-achieved{border-color:rgba(255,209,102,.65);background:linear-gradient(145deg,#40321d,#101c2b 45%,#07111f)}
+.moment-achieved{border-color:rgba(255,209,102,.6);background:radial-gradient(circle at 85% 26%,#ffd16622,transparent 48%),linear-gradient(145deg,#30291e,#0c1928 68%)}
+button.moment-achieved:hover{border-color:#ffd166}
 .moment-top{display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap}
-.moment-type{font-size:10px;letter-spacing:1px;color:#ffd166}
-.moment-player{display:flex;align-items:center;gap:12px;margin:14px 0 10px;min-width:0}
-.moment-number{font-size:clamp(52px,9vw,82px);line-height:1;font-weight:900;color:#b8ff3b;text-shadow:0 0 25px rgba(184,255,59,.28)}
+.moment-top .eyebrow{font-size:10px;letter-spacing:.13em}
+.moment-type{font-size:10px;letter-spacing:1px;color:#b8ff3b;font-weight:800}
+.moment-achieved .moment-type,.moment-achieved .eyebrow{color:#ffd166}
+.moment-feature{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
+.moment-identity{min-width:0;flex:1}
+.moment-player-name{font:900 clamp(28px,5vw,43px)/.95 'Barlow Condensed',Impact,sans-serif;text-transform:uppercase;overflow-wrap:anywhere;letter-spacing:.015em}
+.moment-number{font:900 30px/1 'Barlow Condensed',Impact,sans-serif;color:#b8ff3b;margin-top:8px}
 .moment-achieved .moment-number{color:#ffd166}
-.moment-person{min-width:0;display:flex;flex-direction:column;gap:3px}
-.moment-person b{font-size:clamp(17px,3vw,24px);overflow-wrap:anywhere;text-transform:uppercase}
-.moment-signature{font-family:cursive;font-style:italic;font-size:21px;color:#d8e5ce}
-.moment-info{margin-top:auto}
-.moment-info h3{font-size:20px;margin:0 0 7px}
-.moment-info p{color:#bdc9d6;font-size:13px;line-height:1.5;margin:0 0 12px}
-.moment-future .moment-type{color:#b8ff3b}
-@media(max-width:420px){.moment-grid{grid-template-columns:1fr}.moment-tile{min-height:210px}}
+.moment-graphic{flex:0 0 92px;width:92px;height:92px;display:grid;place-items:center;color:#b8ff3b;filter:drop-shadow(0 0 14px #b8ff3b33)}
+.moment-achieved .moment-graphic{color:#ffd166;filter:drop-shadow(0 0 14px #ffd16633)}
+.moment-graphic svg{width:100%;height:100%}
+.moment-info h3{font-size:25px;margin:0 0 5px;line-height:1}
+.moment-info p{color:#bdc9d6;font-size:13px;line-height:1.45;margin:0 0 10px}
+.matchtag{font-weight:800;color:#b8ff3b;font-size:12px;letter-spacing:.025em}
+.moment-achieved .matchtag{color:#ffd166}
+@media(max-width:420px){.moment-grid{grid-template-columns:1fr}.moment-tile{padding:15px}.moment-graphic{flex-basis:76px;width:76px;height:76px}}
