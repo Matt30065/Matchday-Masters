@@ -46,7 +46,7 @@ async function cloudFlush(){
  if(!cloud.user||cloud.loading||!cloud.dirty||cloud.conflict||cloud.busy||!navigator.onLine)return;
  cloud.busy=true;const snapshot=JSON.parse(JSON.stringify(db));const revision=cloud.revision;cloudStatus('🟡 SAVING…');
  try{
-  if(!cloud.clubId){if(!snapshot.club)return;const r=await cloud.client.from('clubs').insert({owner_id:cloud.user.id,name:snapshot.club.name,settings:{},sync_revision:0}).select('id').single();if(r.error)throw r.error;cloud.clubId=r.data.id}
+  if(!cloud.clubId){if(!snapshot.club){cloudStatus('🟠 SET UP YOUR CLUB FIRST');return;}const r=await cloud.client.from('clubs').insert({owner_id:cloud.user.id,name:snapshot.club.name,settings:{},sync_revision:0}).select('id').single();if(r.error)throw r.error;cloud.clubId=r.data.id}
   const res=await cloud.client.rpc('mdm_save_primary_state',{p_club_id:cloud.clubId,p_expected_revision:revision,p_state:snapshot});
   if(res.error)throw res.error;
   if(res.data?.conflict){cloud.conflict=true;cloudStatus('⚠ CLOUD CONFLICT — EXPORT BACKUP');alert('Another device updated this club. Export a backup before reloading.');return}
