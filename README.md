@@ -1,23 +1,17 @@
-# Matchday Masters V1.7 — Statistics and Seasons
+# Matchday Masters V1.7.1 — Cloud Status Fix
 
-GitHub Pages: upload the application files to the repository root, replacing V1.6. Do not upload upgrade.py or previous SQL files.
+This maintenance release fixes the status indicator being reset to CONNECTING whenever the app redraws a page. The last known status is now restored after every render. Successful cloud saves show the time of the last sync.
 
-## Changes
-- Season statistics: goals for/against, goal difference, win percentage, best winning and unbeaten runs.
-- Season selector for viewing previous season statistics.
-- Player season breakdown: appearances, starts, goals, assists, hat-tricks, scored and missed penalties (calculated from finished matches).
-- Create a new season from Settings, or select an existing season. Previous seasons and career totals remain available.
-- Offline status on loading locally saved changes.
-- V1.7.0 version badge and cache bump.
+No Supabase SQL changes are required. The database and saving mechanism are unchanged.
 
-## Important scope and limitations
-This release **does not migrate** the existing snapshot storage into normalized Supabase tables. Your working V1.6 cloud snapshot and revision checks are deliberately preserved to avoid data loss. A normalized schema migration needs a separate verified SQL migration and integration test. No new SQL is required for this update.
+## Install
+1. Export a backup from Settings before updating.
+2. Upload the application files from this ZIP into the root of your existing GitHub Pages repository, replacing the older files.
+3. Wait for deployment and check for V1.7.1 at the top of the page. If necessary, fully close/reopen the installed app or reload the website.
 
-Back up from Settings before uploading. Cloud data is not safe for real junior player details until row-level access has been tested with separate accounts. Do not use simultaneous match editing from two devices. Offline behavior still needs testing for app termination, cache loss and conflicts.
+## Test
+1. Add a fictional player and navigate back home without refreshing. The status should progress from SAVING to CLOUD SYNCED with a time.
+2. Refresh the app on another device to confirm the player is present.
+3. Turn airplane mode on and off to check offline/connection messaging.
 
-## Suggested checks
-1. Export a backup in V1.6.
-2. Upload V1.7 app files and verify V1.7.0 badge.
-3. Open Season Statistics and verify results for a completed test match.
-4. Settings: create a new season; verify new season stats start at zero, old season stats remain viewable.
-5. Log out/in after CLOUD SYNCED and check season selection persists.
+This is a focused status-display fix, not a full offline or simultaneous-editing reliability certification. Use fictional player data until account isolation has been security-tested.

@@ -1,9 +1,23 @@
-/* Matchday Masters v1.7: local-first snapshots with revision-checked cloud saves. */
+/* Matchday Masters v1.7.1: local-first snapshots with revision-checked cloud saves. */
 const SUPABASE_URL='https://nfnhxryoxlwhupnftycc.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_x956uwqL74BdFE2RpjNMlA_81Xn09iK';
-const cloud={client:null,user:null,clubId:null,revision:0,busy:false,dirty:false,timer:null,loading:true,conflict:false};
+const cloud={client:null,user:null,clubId:null,revision:0,busy:false,dirty:false,timer:null,loading:true,conflict:false,status:"🟡 CONNECTING…",lastSyncedAt:null};
 const localKey=()=>`mdm-v16-${cloud.user?.id||'anonymous'}`;
-function cloudStatus(message){cloud.status=message;const el=document.getElementById('cloud-status');if(el)el.textContent=message;}
+function cloudStatus(message){
+  cloud.status=message;
+  if(message.startsWith('🟢 CLOUD SYNCED')) cloud.lastSyncedAt=Date.now();
+  refreshCloudStatus();
+}
+function refreshCloudStatus(){
+  const el=document.getElementById('cloud-status');
+  if(!el)return;
+  const message=cloud.status||'🟡 CONNECTING…';
+  const time=cloud.lastSyncedAt&&message.startsWith('🟢 CLOUD SYNCED')
+    ?' · '+new Date(cloud.lastSyncedAt).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '';
+  el.textContent=message+time;
+  el.setAttribute('aria-label',message+time);
+  el.title=cloud.lastSyncedAt?'Last successful cloud sync: '+new Date(cloud.lastSyncedAt).toLocaleString('en-GB'):message;
+}
 function storeLocal(){if(!cloud.user)return false;try{localStorage.setItem(localKey(),JSON.stringify({clubId:cloud.clubId,revision:cloud.revision,dirty:cloud.dirty,db,at:Date.now()}));return true}catch(e){cloudStatus('⚠ DEVICE STORAGE FULL — EXPORT BACKUP');return false}}
 function cachedLocal(){try{return JSON.parse(localStorage.getItem(localKey())||'null')}catch{return null}}
 function authView(){return `<div class="splash"><div class="auth-box"><img class="logo" src="icon.svg" alt=""><div class="eyebrow">PRIVATE CLUB ACCOUNT</div><h1>MATCHDAY<br><span style="color:var(--lime)">MASTERS</span></h1><p>Sign in to your secure club workspace.</p><div class="panel"><form id="cloud-auth-form" class="form"><label class="field">Email<input name="email" type="email" autocomplete="email" required></label><label class="field">Password<input name="password" type="password" minlength="6" autocomplete="current-password" required></label><div class="row"><button class="button" type="submit">SIGN IN</button><button class="ghost" type="button" id="cloud-signup">CREATE ACCOUNT</button></div></form><p class="hint" id="cloud-auth-message">Email confirmation is required for new accounts. Sign in online before using offline mode.</p></div></div></div>`}
@@ -14,4 +28,4 @@ try{const {data,error}=await cloud.client.from('clubs').select('id,name,settings
 async function cloudFlush(){if(!cloud.user||cloud.loading||!cloud.dirty||cloud.conflict||cloud.busy||!navigator.onLine)return;cloud.busy=true;const snapshot=JSON.parse(JSON.stringify(db));const revision=cloud.revision;cloudStatus('🟡 SAVING…');try{if(!cloud.clubId){if(!snapshot.club) return;const res=await cloud.client.from('clubs').insert({owner_id:cloud.user.id,name:snapshot.club.name,settings:{app_state:snapshot},sync_revision:1}).select('id,sync_revision').single();if(res.error)throw res.error;cloud.clubId=res.data.id;cloud.revision=res.data.sync_revision;cloud.dirty=JSON.stringify(snapshot)!==JSON.stringify(db)}else{const res=await cloud.client.rpc('mdm_save_snapshot',{p_club_id:cloud.clubId,p_expected_revision:revision,p_club_name:snapshot.club?.name||'My club',p_state:snapshot});if(res.error)throw res.error;if(res.data===null)throw Error('Save was not confirmed');if(res.data===-1){cloud.conflict=true;cloudStatus('⚠ CLOUD CONFLICT — EXPORT BACKUP');alert('Another device changed this club since you last loaded it. Your local changes are preserved. Export a backup in Settings before reloading.');return}cloud.revision=res.data;cloud.dirty=JSON.stringify(snapshot)!==JSON.stringify(db)}storeLocal();cloudStatus(cloud.dirty?'🟡 MORE CHANGES TO SYNC':'🟢 CLOUD SYNCED')}catch(e){cloud.dirty=true;storeLocal();cloudStatus('🔴 OFFLINE / NOT SYNCED — SAVED ON DEVICE');console.error('Cloud save failed:',e)}finally{cloud.busy=false;if(cloud.dirty&&!cloud.conflict&&navigator.onLine){clearTimeout(cloud.timer);cloud.timer=setTimeout(cloudFlush,5000)}}}
 function queueCloudSave(){cloud.dirty=true;if(!storeLocal())return;cloudStatus(navigator.onLine?'🟡 SAVING…':'🔴 OFFLINE — SAVED ON DEVICE');clearTimeout(cloud.timer);cloud.timer=setTimeout(cloudFlush,700)}
 async function cloudSignOut(){if(cloud.dirty){if(navigator.onLine)await cloudFlush();if(cloud.dirty){alert('Unsynced changes remain on this device. Please reconnect and wait for CLOUD SYNCED before signing out.');return}}await cloud.client.auth.signOut();cloud.user=null;cloud.clubId=null;cloud.revision=0;cloud.dirty=false;db=initial();renderAuth()}
-async function initCloud(){if(!window.supabase){showCloudError('Connection library unavailable. Connect to the internet and reload to sign in.');return}cloud.client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});cloud.client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'){cloud.user=null;cloud.clubId=null;renderAuth()}});await cloudLoad();window.addEventListener('online',()=>{if(cloud.dirty)cloudFlush();else cloudStatus('🟢 CLOUD SYNCED')});window.addEventListener('offline',()=>cloudStatus('🔴 OFFLINE — SAVED ON DEVICE'));document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cloud.dirty)cloudFlush()})}
+async function initCloud(){if(!window.supabase){showCloudError('Connection library unavailable. Connect to the internet and reload to sign in.');return}cloud.client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});cloud.client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'){cloud.user=null;cloud.clubId=null;renderAuth()}});await cloudLoad();window.addEventListener('online',()=>{if(cloud.dirty)cloudFlush();else cloudStatus(cloud.conflict?'⚠ CLOUD CONFLICT — EXPORT BACKUP':'🟡 CONNECTING…')});window.addEventListener('offline',()=>cloudStatus(cloud.dirty?'🔴 OFFLINE — SAVED ON DEVICE':'🔴 OFFLINE — LAST CLOUD SAVE RETAINED'));document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cloud.dirty)cloudFlush()})}
