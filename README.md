@@ -1,23 +1,16 @@
-# Matchday Masters V1.9.0 — Cloud safety checks
+# Matchday Masters V1.9.1 — Structured Mirror (safe first step)
 
-This is a **conservative security and reliability checkpoint** built from V1.8.2.1. The approved matchday UI, Moments, and cloud snapshot storage are unchanged.
+## Install in this order
+1. Export a backup from V1.9 (Settings > Export Backup). Keep the V1.9 ZIP as a rollback.
+2. In Supabase SQL Editor, run `supabase-v1.9.1-structured-mirror.sql` **once**. It creates five private, structured mirror tables and a guarded RPC. It does **not** modify or remove the original snapshot or seven existing tables.
+3. Upload `index.html`, `app.js`, `cloud.js`, `style.css`, `sw.js`, `manifest.webmanifest`, and `icon.svg` to your existing GitHub Pages repository root. **Do not upload the SQL file or patch.py.**
+4. Wait for V1.9.1 badge. Sign in online. Go to Settings > Cloud Health > REFRESH STRUCTURED MIRROR.
+5. Confirm mirror counts for players, matches, events. Add a fictional player, wait for CLOUD SYNCED, refresh mirror, and confirm counts increase. Test from the second device.
 
-## What's included
-- A **Cloud Health** panel in Settings, showing last confirmed upload, pending local changes, conflict status, and a **read-only** server revision check.
-- A **Retry Sync** button and a best-effort browser warning when closing a page with pending edits.
-- Version and cache update to V1.9.0.
-- `supabase-v1.9-security-audit.sql`: read-only SQL to inspect RLS policies, anonymous permissions, and snapshot RPC access.
+## Scope and safeguards
+This is **phase one**, not a cutover: the existing `clubs.settings.app_state` snapshot remains the authoritative read/write source. The structured mirror contains separate season, player, match and event rows (with original source IDs and raw event/match payloads) and a revision/count ledger. The mirror is read-only to browser clients; the authenticated RPC rebuilds it transactionally from the cloud snapshot after ownership verification. Mirror failure **does not mean the primary cloud save failed**; inspect Cloud Health. This avoids changing the previously tested offline sync logic.
 
-## Installation
-1. In V1.8.2, export a backup and wait for CLOUD SYNCED.
-2. Upload the app files (index.html, app.js, cloud.js, style.css, sw.js, manifest.webmanifest, icon.svg) to the GitHub repository root. **Do not upload the SQL audit to GitHub.**
-3. Check the V1.9.0 badge. In Settings, use CHECK CLOUD to compare revisions.
-4. Run `supabase-v1.9-security-audit.sql` in Supabase SQL Editor. This only reads metadata; it does not modify tables.
-5. Check that all seven tables show `rls_enabled = true`, all `anon_* = false`, and `anon_can_save_snapshot = false`. Review policy text and run a separate two-account access test before storing children's real details.
+The pre-existing `seasons`, `players`, `matches`, `match_players`, `match_events`, and `moments` tables are **not yet used** as the app's source of truth. Migration to those canonical tables and recovery/concurrency testing remain outstanding. Do not use real children's data until release testing is complete.
 
-## Known limits
-- This release **does not** migrate snapshot JSON into normalized tables. That migration requires a separately staged, reversible process with verification of existing data and is still outstanding.
-- A matching cloud revision does not mean another browser has refreshed its display. Do not record the same match on two devices at once.
-- Browser close warnings may be suppressed; always wait for CLOUD SYNCED and export backups.
-- Offline caching of the Supabase JavaScript CDN remains a limitation for cold-start offline use. Do not rely on this app as the sole match record yet.
-- RLS metadata inspection is **not** proof of tenant isolation. Test with two separate accounts before real child data.
+## Rollback
+If the mirror fails or you see unexpected behaviour, re-upload the previous V1.9 application files. No data migration is required because the source snapshot was not modified. Keep the new mirror tables for diagnosis; no destructive SQL is needed.
