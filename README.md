@@ -1,17 +1,23 @@
-# Matchday Masters V1.7.1 — Cloud Status Fix
+# Matchday Masters V1.8.0 — Moments Engine
 
-This maintenance release fixes the status indicator being reset to CONNECTING whenever the app redraws a page. The last known status is now restored after every render. Successful cloud saves show the time of the last sync.
+This version builds on the working V1.7.1 cloud-connected application.
 
-No Supabase SQL changes are required. The database and saving mechanism are unchanged.
+## What's new
+- Premium collectible moment tiles with player name, shirt number and decorative script signature.
+- Achievements derived from completed match records: first goal, career/season goal totals, assists, hat-tricks, appearances, starting streaks and scoring streaks.
+- Upcoming milestones for goals, assists, appearances and consecutive starts.
+- Club records for top scorer, most appearances, most assists and biggest victory.
+- Tapping an achieved moment opens the original match report.
+- Achieved moments are recalculated from match history after a match is deleted, rather than stored as permanent stale entries.
 
-## Install
-1. Export a backup from Settings before updating.
-2. Upload the application files from this ZIP into the root of your existing GitHub Pages repository, replacing the older files.
-3. Wait for deployment and check for V1.7.1 at the top of the page. If necessary, fully close/reopen the installed app or reload the website.
+## Deployment
+1. Export a backup in Settings.
+2. Extract the ZIP and upload the app files to the root of the existing GitHub Pages repository, replacing existing files.
+3. Confirm the version badge shows V1.8.0. No new Supabase SQL is needed.
 
-## Test
-1. Add a fictional player and navigate back home without refreshing. The status should progress from SAVING to CLOUD SYNCED with a time.
-2. Refresh the app on another device to confirm the player is present.
-3. Turn airplane mode on and off to check offline/connection messaging.
-
-This is a focused status-display fix, not a full offline or simultaneous-editing reliability certification. Use fictional player data until account isolation has been security-tested.
+## Limitations
+- This is a development build; full browser and security testing are outstanding.
+- Moments are computed from completed matches only. If you imported aggregate player totals without match events, the engine cannot reconstruct historical achievements.
+- Matches with identical dates are ordered by ID. For accurate same-day milestone ordering, enter matches in chronological order and avoid ambiguous date-only ordering.
+- Club records are derived from current completed matches; historical edits and deletions change records automatically.
+- The cloud schema is unchanged; normalized database migration and security verification remain future work.
