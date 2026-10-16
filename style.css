@@ -93,3 +93,9 @@ button.moment-achieved:hover{border-color:#ffd166}
 .matchtag{font-weight:800;color:#b8ff3b;font-size:12px;letter-spacing:.025em}
 .moment-achieved .matchtag{color:#ffd166}
 @media(max-width:420px){.moment-grid{grid-template-columns:1fr}.moment-tile{padding:15px}.moment-graphic{flex-basis:76px;width:76px;height:76px}}
+
+/* V1.9.3: unfinished-match recovery panel */
+.recovery-banner{display:flex;flex-direction:column;gap:6px;text-align:left;margin:16px 0;padding:16px 18px;border:1px solid rgba(184,255,59,.55);border-radius:16px;background:rgba(7,17,31,.88);color:#f5f7fa}
+.recovery-banner strong{color:#b8ff3b;letter-spacing:.08em;font-size:.85rem}
+.recovery-banner span{font-weight:750;overflow-wrap:anywhere}
+.recovery-banner small{color:#a8b7c9}

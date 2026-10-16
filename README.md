@@ -1,20 +1,25 @@
-# Matchday Masters V1.9.2.1 — Fresh-data structured storage test
+# Matchday Masters V1.9.3 — Match Recovery Test Build
 
-This release keeps the approved matchday UI. It loads fresh club data from `mdm_primary_state`, not the old `clubs.settings.app_state`. Old test data is NOT deleted. Your existing login remains valid. **Back up V1.9.1 before installing.**
+Upload the web app files at ZIP root to the existing GitHub Pages repository. No new SQL is required. Do not upload `README.md` unless desired.
 
-## Install
-1. Run `supabase-v1.9.2.1-primary-storage.sql` in Supabase SQL Editor (once). The V1.9.1 structured mirror upgrade must already be installed.
-2. Upload `index.html`, `app.js`, `cloud.js`, `style.css`, `sw.js`, `manifest.webmanifest`, `icon.svg` to the GitHub Pages repository root. Do not upload the SQL file or this README.
-3. Confirm version V1.9.2.1. Log in and complete fresh club setup. Your existing Supabase account is reused.
-4. Add a fictional player, wait for CLOUD SYNCED, then refresh a second device and confirm the new club and player appear.
-5. Record a test match with a goal, wait for sync and verify it on the second device. Test offline separately.
+## What changed
+- Home screen highlights an unfinished match, its score, phase, and live clock, with the existing RESUME LIVE MATCH action.
+- Local cloud snapshot is explicitly persisted on pagehide and when the app is backgrounded.
+- A failed cloud load no longer describes a cached local copy as definitely offline or cloud-synced.
+- Version and service worker cache bumped to V1.9.3.
 
-## Implementation detail and limitations
-- The primary state is a version-checked JSON document in `mdm_primary_state`. Each successful write **atomically rebuilds** individual `mdm_structured_players`, `mdm_structured_seasons`, `mdm_structured_matches` and `mdm_structured_events` records. A compatibility copy is also stored in `clubs.settings.app_state` for the projection function. This is **not yet incremental per-event saving**; each save transmits the full current state. Do not use concurrent recording devices.
-- New installs do not import the old test club state. Existing legacy records remain in Supabase for rollback and can be removed later, after verification.
-- Browser offline storage is still device-local. Test interrupted uploads and forced closure before recording real matches.
-- The structured data tables have owner-scoped RLS read policies and no direct browser write grants. The owner-checked RPC writes the records transactionally.
-- If an error appears, **stop and do not reset your database**. Return to V1.9.1 and report the exact error.
+## Important limitations
+- This is still a full-state cloud snapshot save, not independent event uploads.
+- The clock uses wall-clock time while running. If a browser is closed during play, elapsed time continues. If play stops while the app is closed, adjust the clock manually on return.
+- Only one device should edit a match at a time. Cloud revisions help detect conflicts, but cannot guarantee recovery from every interrupted upload or concurrent edit.
+- Offline reopening depends on the app and authentication assets already being cached. The Supabase authentication library is CDN-hosted and may prevent a cold offline launch.
+- Browser storage can be cleared by the user or device; export backups regularly.
 
-## V1.9.2.1 scroll fix
-Opening a new page (including Live Match and Match Report) resets the browser scroll position after rendering. Recording events within the same live match does not force a scroll reset. No database changes required.
+## Suggested tests (fictional data only)
+1. Create a match and kick off; close the tab, reopen online and verify score, phase and clock.
+2. Pause at half time, close/reopen, confirm clock does not advance until second-half kick-off.
+3. Open app online, turn on airplane mode, record a goal, close and reopen while still offline. Check whether the cached app loads and goal remains. If offline reopening fails, **do not clear site data**; reconnect and recover the locally saved event.
+4. Reconnect and wait for CLOUD SYNCED, then verify on another device.
+5. Try two-device editing only with throwaway test data; export backups first.
+
+This build has passed JavaScript syntax checks, not full browser-based or live database end-to-end tests.

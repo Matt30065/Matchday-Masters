@@ -40,7 +40,7 @@ async function cloudLoad(){
   cloud.revision=stored?.revision||0;
   db=stored?.state||initial();if(!db.season)db.season=seasonNow();
   cloud.dirty=false;storeLocal();cloud.loading=false;page='home';matchId=null;render();cloudStatus('🟢 CLOUD SYNCED');
- }catch(e){if(cached?.db){cloud.clubId=cached.clubId;cloud.revision=cached.revision||0;db=cached.db;cloud.loading=false;page='home';matchId=null;render();cloudStatus('🔴 OFFLINE — SAVED ON DEVICE')}else{cloud.loading=false;showCloudError(e.message||'Connect online to load your club for the first time.')}}
+ }catch(e){if(cached?.db){cloud.clubId=cached.clubId;cloud.revision=cached.revision||0;db=cached.db;cloud.loading=false;page='home';matchId=null;render();cloudStatus('🔴 CLOUD UNAVAILABLE — LOCAL COPY LOADED')}else{cloud.loading=false;showCloudError(e.message||'Connect online to load your club for the first time.')}}
 }
 async function cloudFlush(){
  if(!cloud.user||cloud.loading||!cloud.dirty||cloud.conflict||cloud.busy||!navigator.onLine)return;
@@ -60,7 +60,7 @@ async function cloudFlush(){
 }
 function queueCloudSave(){cloud.dirty=true;if(!storeLocal())return;cloudStatus(navigator.onLine?'🟡 SAVING…':'🔴 OFFLINE — SAVED ON DEVICE');clearTimeout(cloud.timer);cloud.timer=setTimeout(cloudFlush,700)}
 async function cloudSignOut(){if(cloud.dirty){if(navigator.onLine)await cloudFlush();if(cloud.dirty){alert('Unsynced changes remain on this device. Please reconnect and wait for CLOUD SYNCED before signing out.');return}}await cloud.client.auth.signOut();cloud.user=null;cloud.clubId=null;cloud.revision=0;cloud.dirty=false;db=initial();renderAuth()}
-async function initCloud(){if(!window.supabase){showCloudError('Connection library unavailable. Connect to the internet and reload to sign in.');return}cloud.client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});cloud.client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'){cloud.user=null;cloud.clubId=null;renderAuth()}});await cloudLoad();window.addEventListener('online',()=>{if(cloud.dirty)cloudFlush();else cloudStatus(cloud.conflict?'⚠ CLOUD CONFLICT — EXPORT BACKUP':'🟡 CONNECTING…')});window.addEventListener('offline',()=>cloudStatus(cloud.dirty?'🔴 OFFLINE — SAVED ON DEVICE':'🔴 OFFLINE — LAST CLOUD SAVE RETAINED'));document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cloud.dirty)cloudFlush()})}
+async function initCloud(){if(!window.supabase){showCloudError('Connection library unavailable. Connect to the internet and reload to sign in.');return}cloud.client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});cloud.client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'){cloud.user=null;cloud.clubId=null;renderAuth()}});await cloudLoad();window.addEventListener('online',()=>{if(cloud.dirty)cloudFlush();else if(!cloud.conflict){cloudStatus('🟡 CONNECTING…');checkCloudHealth().catch(()=>{});}else cloudStatus('⚠ CLOUD CONFLICT — EXPORT BACKUP')});window.addEventListener('offline',()=>cloudStatus(cloud.dirty?'🔴 OFFLINE — SAVED ON DEVICE':'🔴 OFFLINE — LAST CLOUD SAVE RETAINED'));document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cloud.dirty)cloudFlush()})}
 
 // V1.9: read-only cloud verification. Never claim sync solely from navigator.onLine.
 function updateCloudHealth(extra=''){
@@ -105,3 +105,7 @@ async function refreshStructuredMirror(){
     console.warn('Structured mirror not refreshed:',error);
   }finally{cloud.mirrorBusy=false;updateCloudHealth()}
 }
+
+// V1.9.3: preserve the latest in-memory snapshot on page closure or backgrounding.
+window.addEventListener('pagehide',()=>{if(cloud.user)storeLocal()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&cloud.user)storeLocal()});
