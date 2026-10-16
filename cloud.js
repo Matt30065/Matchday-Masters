@@ -59,6 +59,39 @@ async function cloudFlush(){
  finally{cloud.busy=false;if(cloud.dirty&&!cloud.conflict&&navigator.onLine){clearTimeout(cloud.timer);cloud.timer=setTimeout(cloudFlush,5000)}}
 }
 function queueCloudSave(){cloud.dirty=true;if(!storeLocal())return;cloudStatus(navigator.onLine?'🟡 SAVING…':'🔴 OFFLINE — SAVED ON DEVICE');clearTimeout(cloud.timer);cloud.timer=setTimeout(cloudFlush,700)}
+// Resolve an existing revision conflict by explicitly choosing the remote version.
+// Never attempt to upload or merge the stale local snapshot in this operation.
+async function reloadCloudAfterConflict(){
+ if(!cloud.conflict){alert('There is no cloud conflict to resolve.');return}
+ if(!cloud.user||!cloud.clubId||!cloud.client){alert('Sign in and load your club first.');return}
+ if(!navigator.onLine){alert('Connect to the internet before reloading cloud data.');return}
+ if(cloud.busy||cloud.loading){alert('Please wait for the current operation to finish.');return}
+ if(!confirm('RELOAD FROM CLOUD?\n\nAny unsynchronised changes on THIS DEVICE will be discarded. Your existing cloud data will not be changed.\n\nExport a backup first if you want to keep your device changes.\n\nContinue?'))return;
+ if(!confirm('FINAL CONFIRMATION\n\nReplace this device\'s conflicting club data with the latest cloud version?'))return;
+ const previous={db,revision:cloud.revision,dirty:cloud.dirty,conflict:cloud.conflict,mirror:cloud.mirror,status:cloud.status};
+ cloud.loading=true;
+ clearTimeout(cloud.timer);
+ cloudStatus('🟡 LOADING CLOUD VERSION…');
+ try{
+  const {data:auth,error:authError}=await cloud.client.auth.getUser();
+  if(authError||auth?.user?.id!==cloud.user.id)throw Error('Your session changed. Sign in again before resolving the conflict.');
+  const {data,error}=await cloud.client.from('mdm_primary_state').select('state,revision').eq('club_id',cloud.clubId).single();
+  if(error)throw error;
+  if(!data||!data.state||!data.state.club||!Array.isArray(data.state.players)||!Array.isArray(data.state.matches)||!Number.isFinite(Number(data.revision)))throw Error('The cloud version is missing or invalid. Your device data was not replaced.');
+  // Persist the cloud copy before updating the UI; don't claim success if local storage fails.
+  const fresh=JSON.parse(JSON.stringify(data.state));
+  if(!fresh.season)fresh.season=seasonNow();
+  const saved=JSON.stringify({clubId:cloud.clubId,revision:Number(data.revision),dirty:false,db:fresh,at:Date.now()});
+  localStorage.setItem(localKey(),saved);
+  db=fresh;cloud.revision=Number(data.revision);cloud.dirty=false;cloud.conflict=false;cloud.mirror=null;
+  page='home';matchId=null;cloud.loading=false;render();cloudStatus('🟢 CLOUD SYNCED');
+  alert('Latest cloud version loaded. This device is now synchronised.');
+ }catch(e){
+  db=previous.db;cloud.revision=previous.revision;cloud.dirty=previous.dirty;cloud.conflict=previous.conflict;cloud.mirror=previous.mirror;cloud.loading=false;
+  cloudStatus(previous.status);
+  alert('Could not load the cloud version. Your local changes are still retained. '+(e.message||'Please try again.'));
+ }
+}
 async function cloudSignOut(){if(cloud.dirty){if(navigator.onLine)await cloudFlush();if(cloud.dirty){alert('Unsynced changes remain on this device. Please reconnect and wait for CLOUD SYNCED before signing out.');return}}await cloud.client.auth.signOut();cloud.user=null;cloud.clubId=null;cloud.revision=0;cloud.dirty=false;db=initial();renderAuth()}
 async function initCloud(){if(!window.supabase){showCloudError('Connection library unavailable. Connect to the internet and reload to sign in.');return}cloud.client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});cloud.client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'){cloud.user=null;cloud.clubId=null;renderAuth()}});await cloudLoad();window.addEventListener('online',()=>{if(cloud.dirty)cloudFlush();else if(!cloud.conflict){cloudStatus('🟡 CONNECTING…');checkCloudHealth().catch(()=>{});}else cloudStatus('⚠ CLOUD CONFLICT — EXPORT BACKUP')});window.addEventListener('offline',()=>cloudStatus(cloud.dirty?'🔴 OFFLINE — SAVED ON DEVICE':'🔴 OFFLINE — LAST CLOUD SAVE RETAINED'));document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cloud.dirty)cloudFlush()})}
 

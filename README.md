@@ -1,4 +1,4 @@
-# Matchday Masters V2.0.0 Release Candidate 1
+# Matchday Masters V2.0.0 Release Candidate 2
 
 Built from the supplied V1.9.3.1 application. This is a release candidate, **not a security-certified production release**.
 
@@ -7,12 +7,12 @@ Built from the supplied V1.9.3.1 application. This is a release candidate, **not
 - Prevented double-commit of the same goal in the two-selection goal recorder if the final selection is tapped rapidly.
 - Clarified that Reset All Data also syncs deletion to the cloud.
 - Fixed a cloud save edge case where an early return without a club could leave an unhelpful Saving indicator.
-- Version and service-worker cache bumped to 2.0.0-rc1.
+- Version and service-worker cache bumped to 2.0.0-rc2.
 
 ## Installation
 1. Export a backup from the current app.
 2. Upload index.html, app.js, cloud.js, style.css, sw.js, icon.svg, and manifest.webmanifest to the **root** of your existing GitHub repository.
-3. Wait for GitHub Pages to deploy; verify V2.0.0-rc1 in the header.
+3. Wait for GitHub Pages to deploy; verify V2.0.0-rc2 in the header.
 4. No Supabase SQL changes are required.
 
 ## Required release tests (fictional data only)
@@ -31,3 +31,10 @@ Built from the supplied V1.9.3.1 application. This is a release candidate, **not
 - Browser local storage can be cleared by the device. Export regular backups.
 - Security isolation of the new primary-state RPC and tables has not been independently verified in this environment.
 - No automated end-to-end browser test against the live Supabase instance was performed.
+
+## RC2: Resolve a cloud conflict
+When CLOUD CONFLICT appears, open Settings > Cloud Health. Export a local JSON backup first (Settings > Data & Backups), then select **RELOAD FROM CLOUD**. Two confirmations warn that unsynced local edits will be discarded. The action only reads Supabase; it does not upload stale data. It validates the remote snapshot and writes it locally before marking the device synced. If loading fails, local data and the conflict state are retained.
+
+For the current test: the cloud version should retain Player A #10; the offline phone edit to Player B #20 will be discarded (unless you kept the exported JSON backup). Do not import the stale backup into the live account.
+
+No SQL changes required. Security checks on the structured tables are still pending.
